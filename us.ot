@@ -1,0 +1,45 @@
+# Outputs placeholder
+
+output "id" {
+  value = aws_cognito_user_pool.this.id
+}
+
+output "domain" {
+  value = aws_cognito_user_pool_domain.this.domain
+}
+
+output "wellknown_endpoint" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/.well-known/openid-configuration"
+}
+
+output "authorization_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/authorize"
+}
+
+output "end_session_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/logout"
+}
+
+output "issuer" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/"
+}
+
+output "jwks_uri" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/.well-known/jwks.json"
+}
+
+output "revocation_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/revoke"
+}
+
+output "token_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/token"
+}
+
+output "userinfo_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/userinfo"
+}
+
+output "arn" {
+  value = aws_cognito_user_pool.this.arn
+}
