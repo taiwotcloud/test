@@ -1,0 +1,34 @@
+# App Settings secret key, created in mission area account to provide info to developers.
+output "cognito_settings_secret" {
+  value = module.appclient-settings.secret_ids
+}
+
+output "cognito_settings_secret_name" {
+  value = local.appclient_settings_secret_name
+}
+
+output "user_pool_id" {
+  value = data.terraform_remote_state.userpool.outputs.id
+}
+
+output "user_pool_client_id" {
+  value = resource.aws_cognito_user_pool_client.this.id
+}
+
+/*
+output "saml_provider_id" {
+  description = "ID of the SAML Identity Provider"
+  value       = aws_cognito_identity_provider.saml_provider.id
+}
+
+output "user_pool_client_id" {
+  description = "Cognito User Pool Client ID"
+  value       = aws_cognito_user_pool_client.cognito_client.id
+}
+
+output "iam_role_arn" {
+  description = "IAM Role ARN for Cognito-Authenticated Users"
+  value       = aws_iam_role.cognito_authenticated_role.arn
+}
+
+/*
