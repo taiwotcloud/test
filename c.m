@@ -1,21 +1,9 @@
-/*
-
-Data lookup for userpool provider settings
-
-*/
-
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 data "aws_secretsmanager_secret" "provider_settings" {
   arn = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:cognito-userpool-settings"
 }
-
-/*
-
-Create Cognito User Pool
-
-*/
 
 resource "aws_cognito_user_pool" "this" {
   name             = var.aws_cognito_user_pool_name
@@ -220,14 +208,6 @@ resource "aws_cognito_identity_provider" "this" {
   }
 }
 
-
-/*
-
- Create resource server to associate with user pool
- Needed for custom scopes
-
-*/
-
 resource "aws_cognito_resource_server" "this" {
   identifier = "usda_credential_data"
   name       = "usda_credential_data"
@@ -245,11 +225,6 @@ resource "aws_cognito_resource_server" "this" {
 data "aws_secretsmanager_secret_version" "provider_settings" {
   secret_id = "cognito-userpool-settings"
 }
-
-#data "aws_secretsmanager_secret_version" "saml_metadata_version" {
- # secret_id = data.aws_secretsmanager_secret.saml_metadata.id
-#}
-
 
 # Create SAML Identity Provider
 resource "aws_cognito_identity_provider" "saml_provider" {
