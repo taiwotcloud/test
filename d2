@@ -1,0 +1,31 @@
+# Add these variables to your existing variables.tf file
+
+variable "datazone_domain_id" {
+  description = "ID of the DataZone domain"
+  type        = string
+  default     = "dzd_581xa3qdroeazr"  # Extract from your DataZone portal URL
+}
+
+variable "datazone_client_name" {
+  description = "Name for the DataZone Cognito client"
+  type        = string
+  default     = "DataZoneClient"
+}
+
+variable "datazone_role_name" {
+  description = "Name for IAM role for DataZone access"
+  type        = string
+  default     = "DataZoneAccessRole"
+}
+
+variable "datazone_policy_name" {
+  description = "Name for IAM policy for DataZone access"
+  type        = string
+  default     = "DataZoneAccessPolicy"
+}
+
+variable "datazone_portal_url" {
+  description = "URL for the DataZone portal"
+  type        = string
+  default     = "https://dzd_581xa3qdroeazr.datazone.us-east-1.on.aws/"
+}
