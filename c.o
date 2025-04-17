@@ -1,34 +1,81 @@
-# App Settings secret key, created in mission area account to provide info to developers.
-output "cognito_settings_secret" {
-  value = module.appclient-settings.secret_ids
+# Outputs placeholder
+
+output "id" {
+  value = aws_cognito_user_pool.this.id
 }
 
-output "cognito_settings_secret_name" {
-  value = local.appclient_settings_secret_name
+output "domain" {
+  value = aws_cognito_user_pool_domain.this.domain
 }
 
-output "user_pool_id" {
-  value = data.terraform_remote_state.userpool.outputs.id
+output "wellknown_endpoint" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/.well-known/openid-configuration"
 }
 
-output "user_pool_client_id" {
-  value = resource.aws_cognito_user_pool_client.this.id
+
+output "authorization_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/authorize"
 }
 
-/*
+output "end_session_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/logout"
+}
+
+output "issuer" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/"
+}
+
+output "jwks_uri" {
+  value = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.this.id}/.well-known/jwks.json"
+}
+
+output "revocation_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/revoke"
+}
+
+output "token_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/token"
+}
+
+output "userinfo_endpoint" {
+  value = "https://${aws_cognito_user_pool_domain.this.domain}.auth.us-east-1.amazoncognito.com/oauth2/userinfo"
+}
+
+
+
+output "cert_logout_url" {
+  description = "CERT environment logout URL"
+  value       = "https://www.cert.eauth.usda.gov/eauth/b/usda/logoff"
+}
+
+output "prod_logout_url" {
+  description = "Production environment logout URL"
+  value       = "https://www.eauth.usda.gov/eauth/b/usda/logoff"
+}
+
+output "callback_url" {
+  description = "Callback URL for authentication responses"
+  value       = "https://fbc-cert.auth.us-east-1.amazoncognito.com/oauth2/idpresponse"
+}
+
+output "saml2_metadata" {
+  description = "SAML metadata for Cognito integration"
+  value       = <<EOT
+<?xml version="1.0" encoding="UTF-8"?>
+<ns4:EntityDescriptor xmlns:ns4="urn:oasis:names:tc:SAML:2.0:metadata" xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:ns2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:ns3="http://www.w3.org/2001/04/xmlenc#" ID="SM169931eafe490184b87a09bb122b654d5069aecf0a2" entityID="USDA_SAML2_eAuth_CERT_IDP">
+    <!-- Add full metadata content here -->
+</ns4:EntityDescriptor>
+EOT
+}
+
+
+output "arn" {
+  value = aws_cognito_user_pool.this.arn
+}
+
 output "saml_provider_id" {
   description = "ID of the SAML Identity Provider"
   value       = aws_cognito_identity_provider.saml_provider.id
 }
 
-output "user_pool_client_id" {
-  description = "Cognito User Pool Client ID"
-  value       = aws_cognito_user_pool_client.cognito_client.id
-}
 
-output "iam_role_arn" {
-  description = "IAM Role ARN for Cognito-Authenticated Users"
-  value       = aws_iam_role.cognito_authenticated_role.arn
-}
-
-/*
