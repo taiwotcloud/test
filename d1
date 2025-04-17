@@ -1,0 +1,126 @@
+# Add this to your existing main.tf file for DataZone integration
+
+# Create a Cognito User Pool Client specifically for DataZone
+resource "aws_cognito_user_pool_client" "datazone_client" {
+  name                          = "DataZoneClient"
+  user_pool_id                  = var.user_pool_id
+  generate_secret               = true
+  allowed_oauth_flows           = ["code", "implicit"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_scopes          = ["openid", "email", "profile", "usda_credential_data"]
+  callback_urls                 = [
+    "https://dzd_581xa3qdroeazr.datazone.us-east-1.on.aws/",
+    "https://signin.aws.amazon.com/saml"
+  ]
+  logout_urls                   = ["https://dzd_581xa3qdroeazr.datazone.us-east-1.on.aws/logout"]
+  supported_identity_providers  = [var.aws_cognito_identity_provider_name]
+
+  # Reuse your existing attribute mappings as needed
+  # These values should align with what's needed for DataZone
+}
+
+# Enable IAM Identity Center for the organization
+resource "aws_ssoadmin_instance" "identity_center" {
+  # This resource enables IAM Identity Center
+  # No additional configuration needed here
+}
+
+# Create IAM Role for DataZone access
+resource "aws_iam_role" "datazone_role" {
+  name = "DataZoneAccessRole"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:saml-provider/DataZoneSAMLProvider"
+        },
+        Action = "sts:AssumeRoleWithSAML",
+        Condition = {
+          StringEquals = {
+            "SAML:aud": "https://signin.aws.amazon.com/saml"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Create SAML provider for IAM (using your existing SAML metadata)
+resource "aws_iam_saml_provider" "datazone_saml" {
+  name                   = "DataZoneSAMLProvider"
+  # Reuse the SAML metadata from your existing configuration
+  saml_metadata_document = jsondecode(data.aws_secretsmanager_secret_version.provider_settings.secret_string)["saml2_metadata"]
+}
+
+# Create IAM Policy for DataZone access
+resource "aws_iam_policy" "datazone_policy" {
+  name        = "DataZoneAccessPolicy"
+  description = "Policy for DataZone access"
+  
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "datazone:*"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Attach policy to role
+resource "aws_iam_role_policy_attachment" "datazone_policy_attachment" {
+  role       = aws_iam_role.datazone_role.name
+  policy_arn = aws_iam_policy.datazone_policy.arn
+}
+
+# Set up DataZone domain configuration
+resource "aws_datazone_domain_configuration" "datazone_auth_config" {
+  domain_identifier = var.datazone_domain_id
+  
+  user_identity_provider_configuration {
+    identity_provider_type = "IAM_IDENTITY_CENTER"
+    
+    iam_identity_center_configuration {
+      instance_arn = aws_ssoadmin_instance.identity_center.arn
+    }
+  }
+}
+
+# Set up external identity provider connection within Identity Center
+# This connects your existing SAML provider to IAM Identity Center
+resource "aws_identitystore_external_id_provider" "identity_center_provider" {
+  depends_on = [aws_ssoadmin_instance.identity_center]
+  
+  # Note: You'll need to get the identity_store_id from the AWS SSO instance
+  # This is typically available as an attribute of the aws_ssoadmin_instance resource
+  identity_store_id = tolist(data.aws_ssoadmin_instances.main.identity_store_ids)[0]
+  
+  provider_type = "SAML"
+  provider_name = "eAuth-ICAM-SAML"
+}
+
+# Data source to get the Identity Store ID from the SSO instance
+data "aws_ssoadmin_instances" "main" {}
+
+# Outputs
+output "datazone_client_id" {
+  value       = aws_cognito_user_pool_client.datazone_client.id
+  description = "The ID of the Cognito User Pool Client for DataZone"
+}
+
+output "datazone_domain_configuration" {
+  value       = aws_datazone_domain_configuration.datazone_auth_config.domain_identifier
+  description = "DataZone domain ID with IAM Identity Center configuration"
+}
+
+output "datazone_portal_url" {
+  value       = "https://dzd_581xa3qdroeazr.datazone.us-east-1.on.aws/"
+  description = "URL for the DataZone portal"
+}
